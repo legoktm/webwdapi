@@ -37,6 +37,8 @@ def run(d):
     # Set the status
     if 'error' in d:
         d['status'] = 'error'
+        # Lets add a documentation link
+        d['help'] = 'https://www.wikidata.org/wiki/User:Legoktm/wdapi'
     else:
         d['status'] = 'success'
 
