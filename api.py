@@ -52,6 +52,8 @@ def run(d, was_cached=False):
     if not was_cached:
         # But don't extend caching for already cached stuff
         mc.set(md5(), d, CACHE_FOR)
+    if was_cached and 'debug' in form:
+        d['cached'] = ''  # For debugging
 
     # Set the status
     if 'error' in d:
