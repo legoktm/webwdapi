@@ -39,7 +39,7 @@ CACHE_FOR = 60 * 60 * 24  # Store for 1 day
 
 def md5():
     d = {}
-    keys = ['property', 'format', 'debug']
+    keys = ['property', 'debug']
     # debug is a random key we can use to bypass caching
     for key in keys:
         if key in form:
