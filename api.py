@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/data/project/wdapi/python/bin/python
 """
 Copyright (C) 2013 Legoktm
 
