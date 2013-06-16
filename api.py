@@ -31,7 +31,7 @@ import pywikibot
 import simplejson
 import wdapi
 
-repo = pywikibot.DataSite('wikidata', 'wikidata')
+repo = pywikibot.Site('en', 'wikipedia').data_repository()
 form = cgi.FieldStorage()
 mc = memcache.Client(['tools-mc'])
 CACHE_FOR = 60 * 60 * 24  # Store for 1 day
