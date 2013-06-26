@@ -3,18 +3,16 @@
 Released in to the public domain by Legoktm, 2013
 """
 
-import cgitb
-cgitb.enable()  # TODO flask this maybe.
-print "Content-type: application/json\n\n"
-import cgi
+from flask import Flask, request
 import hashlib
 import memcache
 import pywikibot
 import simplejson
 import wdapi
+from wsgiref.handlers import CGIHandler
 
+app = Flask(__name__)
 repo = pywikibot.Site('en', 'wikipedia').data_repository()
-form = cgi.FieldStorage()
 mc = memcache.Client(['tools-mc'])
 CACHE_FOR = 60 * 60 * 24  # Store for 1 day
 
@@ -24,8 +22,8 @@ def md5():
     keys = ['property', 'debug']
     # debug is a random key we can use to bypass caching
     for key in keys:
-        if key in form:
-            d[key] = form[key].value
+        if key in request.form:
+            d[key] = request.form[key]
     return hashlib.md5(simplejson.dumps(d)).hexdigest()
 
 
@@ -34,7 +32,7 @@ def run(d, was_cached=False):
     if not was_cached:
         # But don't extend caching for already cached stuff
         mc.set(md5(), d, CACHE_FOR)
-    if was_cached and 'debug' in form:
+    if was_cached and 'debug' in request.form:
         d['cached'] = ''  # For debugging
 
     # Set the status
@@ -46,13 +44,14 @@ def run(d, was_cached=False):
         d['status'] = 'success'
 
     # Now print it
-    if 'format' in form and form['format'].value == 'jsonfm':
+    if 'format' in request.form and request.form['format'] == 'jsonfm':
         #pretty print...
-        print simplejson.dumps(d, indent=4 * ' ')
+        return simplejson.dumps(d, indent=4 * ' ')
     else:
-        print simplejson.dumps(d)
+        return simplejson.dumps(d)
 
 
+@app.route('/', methods=['GET', 'POST'])
 def main():
     # Check if it's been cached already
     old = mc.get(md5())
@@ -60,9 +59,9 @@ def main():
         return run(old, was_cached=True)
 
     # Check that a property was specified
-    if not 'property' in form:
+    if not 'property' in request.form:
         return run({'error': 'noproperty'})
-    prop = form['property'].value.lower()
+    prop = request.form['property'].lower()
     # Make sure it starts with p
     if not prop.startswith('p'):
         prop = 'p' + prop
@@ -77,5 +76,4 @@ def main():
     # so we can just run the function
     return run({'constraints': p.constraints()})
 
-if __name__ == "__main__":
-    main()
+CGIHandler().run(app)
